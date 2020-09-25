@@ -10,12 +10,12 @@ import org.w3c.dom.NodeList;
 
 import cz.vutbr.web.css.CSSFactory;
 import cz.vutbr.web.css.CombinedSelector;
+import cz.vutbr.web.css.CombinedSelector.Specificity;
+import cz.vutbr.web.css.CombinedSelector.Specificity.Level;
 import cz.vutbr.web.css.ElementMatcher;
 import cz.vutbr.web.css.MatchCondition;
 import cz.vutbr.web.css.Rule;
 import cz.vutbr.web.css.Selector;
-import cz.vutbr.web.css.CombinedSelector.Specificity;
-import cz.vutbr.web.css.CombinedSelector.Specificity.Level;
 
 /**
  * Encapsulates one selector for CSS declaration.
@@ -62,7 +62,8 @@ public class SelectorImpl extends AbstractRule<Selector.SelectorPart> implements
     /**
 	 * @return the combinator
 	 */
-	public Combinator getCombinator() {
+	@Override
+  public Combinator getCombinator() {
 		return combinator;
 	}
 
@@ -78,7 +79,8 @@ public class SelectorImpl extends AbstractRule<Selector.SelectorPart> implements
 	/**
 	 * @param combinator the combinator to set
 	 */
-	public Selector setCombinator(Combinator combinator) {
+	@Override
+  public Selector setCombinator(Combinator combinator) {
 		this.combinator = combinator;
 		return this;
 	}
@@ -95,6 +97,7 @@ public class SelectorImpl extends AbstractRule<Selector.SelectorPart> implements
     }
 
 	
+    @Override
     public String getClassName() {
         String className = null;
         for(SelectorPart item : list) {
@@ -106,6 +109,7 @@ public class SelectorImpl extends AbstractRule<Selector.SelectorPart> implements
     }
     
     
+    @Override
     public String getIDName() {
         String idName = null;
         for(SelectorPart item : list) {
@@ -115,6 +119,7 @@ public class SelectorImpl extends AbstractRule<Selector.SelectorPart> implements
         return idName;
     }
     
+    @Override
     public String getElementName() {
     	String elementName = null;
     	for(SelectorPart item : list) {
@@ -139,6 +144,7 @@ public class SelectorImpl extends AbstractRule<Selector.SelectorPart> implements
         return false;
     }
     	
+    @Override
     public boolean matches(Element e) {
     	
 		// check other items of simple selector
@@ -151,6 +157,7 @@ public class SelectorImpl extends AbstractRule<Selector.SelectorPart> implements
 		return true;
     }
     
+    @Override
     public boolean matches(Element e, ElementMatcher matcher, MatchCondition cond) {
         
         // check other items of simple selector
@@ -165,6 +172,7 @@ public class SelectorImpl extends AbstractRule<Selector.SelectorPart> implements
     /**
      * Computes specificity of this selector
      */
+    @Override
     public void computeSpecificity(CombinedSelector.Specificity spec) {   	
 		for(SelectorPart item: list) {
 			item.computeSpecificity(spec);
@@ -219,23 +227,31 @@ public class SelectorImpl extends AbstractRule<Selector.SelectorPart> implements
     		setName(name);
     	}
     	
-		public void computeSpecificity(CombinedSelector.Specificity spec) {
-			if(!WILDCARD.equals(name))
-				spec.add(Level.D);
+		@Override
+    public void computeSpecificity(CombinedSelector.Specificity spec) {
+      if (!WILDCARD.equals(name)) {
+        spec.add(Level.D);
+      }
 		}
 		
-		public boolean matches(Element e, ElementMatcher matcher, MatchCondition cond) {
-			if(name!=null && WILDCARD.equals(name)) return true;
+		@Override
+    public boolean matches(Element e, ElementMatcher matcher, MatchCondition cond) {
+      if (WILDCARD.equals(name)) {
+        return true;
+      }
 			return matcher.matchesName(e, name);
 		}	
 		
-		public String getName() {
+		@Override
+    public String getName() {
 			return name;
 		}
 		
-		public ElementName setName(String name) {
-			if(name == null)
-				throw new IllegalArgumentException("Invalid element name (null)");
+		@Override
+    public ElementName setName(String name) {
+      if (name == null) {
+        throw new IllegalArgumentException("Invalid element name (null)");
+      }
 				
 			this.name = name;
 			return this;
@@ -243,7 +259,11 @@ public class SelectorImpl extends AbstractRule<Selector.SelectorPart> implements
 		
 		@Override
 		public String toString() {
-			return CssEscape.escapeCssIdentifier(name);
+      if (WILDCARD.equals(name)) {
+        return name;
+      } else {
+        return CssEscape.escapeCssIdentifier(name);
+      }
 		}
 
 		/* (non-Javadoc)
@@ -292,19 +312,23 @@ public class SelectorImpl extends AbstractRule<Selector.SelectorPart> implements
     		setClassName(className);
     	}
     	
-    	public void computeSpecificity(Specificity spec) {
+    	@Override
+      public void computeSpecificity(Specificity spec) {
     		spec.add(Level.C);
     	}
     	
-    	public boolean matches(Element e, ElementMatcher matcher, MatchCondition cond) {
+    	@Override
+      public boolean matches(Element e, ElementMatcher matcher, MatchCondition cond) {
     		return matcher.matchesClass(e, className);
     	}
     	
-		public String getClassName() {
+		@Override
+    public String getClassName() {
 			return className;
 		}
     	
-		public ElementClass setClassName(String className) {
+		@Override
+    public ElementClass setClassName(String className) {
 			if(className == null)
 				throw new IllegalArgumentException("Invalid element class (null)");
 			
@@ -931,15 +955,18 @@ public class SelectorImpl extends AbstractRule<Selector.SelectorPart> implements
     		setID(value);
     	}
     	
-    	public void computeSpecificity(Specificity spec) {
+    	@Override
+      public void computeSpecificity(Specificity spec) {
     		spec.add(Level.B);
 		}    	
     	
-    	public boolean matches(Element e, ElementMatcher matcher, MatchCondition cond) {
+    	@Override
+      public boolean matches(Element e, ElementMatcher matcher, MatchCondition cond) {
     		return matcher.matchesID(e, id);
     	}
     	
-    	public ElementID setID(String id) {
+    	@Override
+      public ElementID setID(String id) {
     		if(id==null)
     			throw new IllegalArgumentException("Invalid element ID (null)");
     		
@@ -947,7 +974,8 @@ public class SelectorImpl extends AbstractRule<Selector.SelectorPart> implements
     		return this;
     	}
     	
-    	public String getID() {
+    	@Override
+      public String getID() {
     		return id;
     	}
     	    	
@@ -1014,14 +1042,16 @@ public class SelectorImpl extends AbstractRule<Selector.SelectorPart> implements
     	/**
 		 * @return the operator
 		 */
-		public Operator getOperator() {
+		@Override
+    public Operator getOperator() {
 			return operator;
 		}
 
 		/**
 		 * @param operator the operator to set
 		 */
-		public void setOperator(Operator operator) {
+		@Override
+    public void setOperator(Operator operator) {
 			this.operator = operator;
 		}
 
@@ -1030,7 +1060,8 @@ public class SelectorImpl extends AbstractRule<Selector.SelectorPart> implements
 		/**
 		 * @return the attribute
 		 */
-		public String getAttribute() {
+		@Override
+    public String getAttribute() {
 			return attribute;
 		}
 
@@ -1039,24 +1070,29 @@ public class SelectorImpl extends AbstractRule<Selector.SelectorPart> implements
 		/**
 		 * @param name the attribute to set
 		 */
-		public ElementAttribute setAttribute(String name) {
+		@Override
+    public ElementAttribute setAttribute(String name) {
 			this.attribute = name;
 			return this;
 		}
 		
-		public void computeSpecificity(Specificity spec) {
+		@Override
+    public void computeSpecificity(Specificity spec) {
 			spec.add(Level.C);
 		}
 		
-		public boolean matches(Element e, ElementMatcher matcher, MatchCondition cond) {
+		@Override
+    public boolean matches(Element e, ElementMatcher matcher, MatchCondition cond) {
 			return matcher.matchesAttribute(e, attribute, value, operator);
 		}
     	
-		public String getValue() {
+		@Override
+    public String getValue() {
 			return value;
 		}
 		
-    	public ElementAttribute setValue(String value) {
+    	@Override
+      public ElementAttribute setValue(String value) {
     		this.value = value;
     		return this;
     	}
@@ -1145,21 +1181,25 @@ public class SelectorImpl extends AbstractRule<Selector.SelectorPart> implements
     		this.inlinePriority = inlinePriority;
     	}
 
-		public Element getElement() {
+		@Override
+    public Element getElement() {
 			return elem;
 		}
 
-		public ElementDOM setElement(Element e) {
+		@Override
+    public ElementDOM setElement(Element e) {
 			this.elem = e;
 			return this;
 		}
 
-		public void computeSpecificity(Specificity spec) {
+		@Override
+    public void computeSpecificity(Specificity spec) {
 		    if (inlinePriority)
 		        spec.add(Level.A);
 		}
 
-		public boolean matches(Element e, ElementMatcher matcher, MatchCondition cond) {
+		@Override
+    public boolean matches(Element e, ElementMatcher matcher, MatchCondition cond) {
 			return elem.equals(e);
 		}
 
